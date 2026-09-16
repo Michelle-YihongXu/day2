@@ -1,3 +1,5 @@
+from auth import require_password
+require_password()
 import streamlit as st
 from openai import OpenAI
 from dotenv import load_dotenv
