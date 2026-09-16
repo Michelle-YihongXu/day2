@@ -2,8 +2,22 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 
-# Load variables from .env
+# Load local .env file
 load_dotenv()
+
+
+# ---------------------------------
+# Get password
+# Works locally AND on Streamlit Cloud
+# ---------------------------------
+
+def get_app_password():
+    # First try Streamlit Cloud Secrets
+    try:
+        return st.secrets["PASSWORD"]
+    except Exception:
+        # If running locally, use .env
+        return os.getenv("PASSWORD")
 
 
 # ---------------------------------
@@ -11,32 +25,33 @@ load_dotenv()
 # ---------------------------------
 
 def check_password():
-    """Require a password before accessing the app."""
 
-    correct_password = os.getenv("PASSWORD")
+    correct_password = get_app_password()
 
-    # If already logged in, allow access
+    # Already authenticated in this session
     if st.session_state.get("password_correct", False):
         return True
 
-    # Password input
+    st.title("🔒 Private App")
+
     password = st.text_input(
-        "🔒 Enter password to access this app",
+        "Enter password to continue",
         type="password"
     )
 
-    # Check password
     if password:
+
         if password == correct_password:
             st.session_state["password_correct"] = True
             st.rerun()
+
         else:
-            st.error("❌ Incorrect password")
+            st.error("Incorrect password")
 
     return False
 
 
-# Stop the app here unless password is correct
+# STOP everything if password is incorrect
 if not check_password():
     st.stop()
 
